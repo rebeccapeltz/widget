@@ -55,7 +55,11 @@
                  },
                  _inputValueChange: function(that){
                     //set visibiity and load select options if needed                    
-                    var firstName = $("#"+that.options.id + "_kvlv_select_name option:first").val();
+                    //var firstName = $("#"+that.options.id + "_kvlv_select_name option:first").val();  //first or current
+                    $("#"+that.options.id + "_kvlv_input_value").val('');
+                    $("#"+that.options.id + "_kvlv_select_value").find('option').remove();
+                    
+                    var firstName = $("#"+that.options.id + "_kvlv_select_name").val();
                     var firstObj = that.options.nameData[firstName];
                     var inputDisplay = (!firstObj || firstObj.values.length === 0) ? 'inline-block' : that.NONE;
                     var selectDisplay = (firstObj && firstObj.values.length > 0) ? 'inline-block' : that.NONE;
@@ -72,6 +76,7 @@
                         });
                     }   
                  },
+                
                  _create: function() {
                         var options = this.options;
                         //var NONE_TEXT = "None", NONE_VALUE = "none", NONE="none", REQUIRED_INDICATOR="*";
@@ -191,30 +196,8 @@
                                                     .prop('disabled', true);
                                             }
                                         }
-                                        //clear value or change inputSelect
-                                        that.inputValue.val('');
-                                        $("#"+that.options.id + "_kvlv_select_value").find('option').remove();
                                         
                                         that._inputValueChange(that);
-                                      /*  //set visibiity and load select options if needed
-                                       
-                                        var firstName = $("#"+that.options.id + "_kvlv_select_name option:first").val();
-                                        var firstObj = options.nameData[firstName];
-                                        var inputDisplay = (!firstObj || firstObj.values.length === 0) ? 'inline-block' : NONE;
-                                        var selectDisplay = (firstObj && firstObj.values.length > 0) ? 'inline-block' : NONE;
-                                        that.inputSelect.css('display',selectDisplay);
-                                        that.inputValue.css('display',inputDisplay);
-                                        //if there are values load select options
-                                        if (selectDisplay !== NONE ){
-                                            $.each(firstObj.values, function(key,value) { 
-                                                //mark if required
-                                                 $("#" + that.options.id + "_kvlv_select_value")
-                                                     .append($("<option></option>")
-                                                     .attr("value",value)
-                                                     .text(value)); 
-                                            });
-                                        }   
-                                        */
                                      }
                                 );
 
@@ -229,7 +212,7 @@
                                     .addClass ("ui-sb-select")
                                     .appendTo (listwrapper);
                                 $("<br>").appendTo (listwrapper);
-                                 $('<input type="button" value="Delete" >')
+                                $('<input type="button" value="Delete" >')
                                     .appendTo (listwrapper)
                                     .addClass ("multi-part-element-btn-small")
                                     .click(function(event) {
@@ -261,7 +244,9 @@
                                             hdnList.push(valueObj);
                                         });
                                         $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hdnList));  
-
+                                        
+                                        //adjust input values
+                                        that._inputValueChange(that);
                                         
                                      });
                                      
@@ -269,7 +254,12 @@
                                     .attr("id",that.options.id + "_kvlv_hidden_input")
                                     .attr("type", "hidden")
                                     .val(JSON.stringify([]))
-                                    .appendTo (wrapper)
+                                    .appendTo (wrapper);
+                                
+                                 $("#" + options.id + "_kvlv_select_name").change(function(){
+                                    //adjust input values
+                                    that._inputValueChange(that);
+                                 });
                                     
                                    /*function removeIfInvalid(element) {
                               var value = $( element ).val(),
