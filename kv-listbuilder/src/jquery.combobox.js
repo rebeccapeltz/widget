@@ -1,23 +1,12 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>jQuery UI Select Builder</title>
-    <!--<link rel="stylesheet" href="custom-theme/jquery-ui-1.9.2.custom.min.css">-->
-    <link rel="stylesheet" href="themes/smoothness/jquery-ui-all.css" />
-    <script src="lib/jquery-1.7.1.min.js"></script>
-    <script src="lib/jquery-ui-1.9.2.min.js"></script>
-    <link rel="stylesheet" href="demo.css">
-    <script src="src/jquery.combobox.js"></script>
-    <script>
-    (function( $ ) {
-            $.widget( "becky.selectbuilder", {
+(function( $ ) {
+            $.widget( "becky.combobox", {
                  options: {
-                 id: null,
-                 size: '3'
+                 theSource: [],
+                 force: true,
+                 inputId:null
                 
                  },
-                 /*getValue: function(){
+                 getValue: function(){
                     return this.input.val();
                  },
                  removeFromSource: function(value){
@@ -35,67 +24,18 @@
                     this.options.theSource.push(value);
                     this.input.autocomplete("option","source",this.options.theSource);
                     this.input.val(this.options.theSource && this.options.theSource.length >0 ? this.options.theSource[0]: "");
-                 },*/
+                 },
                  _create: function() {
                         var options = this.options;
-                        var that = this;
-                        var select = this.element.hide(),
-                                selected = select.children( ":selected" ),
-                                //value = options.theSource && options.theSource.length >0 ? options.theSource[0]: "", //selected.val() ? selected.text() : "",
-                                wrapper = this.wrapper = $( "<div>" )
-                                    .addClass( "multi-part-element" )
-                                    .insertAfter( select );
-                                
-                                inputwrapper = this.inputwrapper = $("<div>")
-                                    .attr("id", that.options.id + "input_wrapper")
-                                    .appendTo (wrapper)
-                                listwrapper = this.listwrapper = $("<div>")
-                                    .attr("id", that.options.id + "list_wrapper")
-                                    .appendTo (wrapper)
-                                
-                                $("<span>")
-                                    .attr("id", that.options.id + "sb_cbo")
-                                    .appendTo (inputwrapper)
-                                    .combobox ({inputId:that.options.id + "sb_cbo_value"});
-                                 
-                                this.inputValue = $( "<input>" )
-                                    .appendTo( inputwrapper )
-                                    .attr( "title", "") 
-                                    .attr("id",that.options.id + "sb_input_value")
-                                    .css("margin-left","2.2em")
-                                    .addClass( "ui-sb-value ui-sb-input" );
-                                this.addButton = $('<input type="button" value="Add" >')
-                                    .appendTo (inputwrapper)
-                                    .addClass ("multi-part-element-btn-small");
-                                this.addButton.click(
-                                    function(event) {
-                                        var key = that.inputValue.val();
-                                        $("#"+that.options.id+"select_list")
-                                            .append($("<option></option>")
-                                            .attr("value",key)
-                                            .text(key));
-                                        that.inputValue.val('');
-                                     }
-                                );
-
-                                var valueWidth = $("#"+that.options.id+"sb_input_value").outerWidth(true),
-                                cboWidth = $("#"+that.options.id+"sb_cbo_value").outerWidth(true);
-                                
-                                this.selectList = $("<select>")
-                                    .attr("id",that.options.id + "select_list")
-                                    .css('width',cboWidth + valueWidth)
-                                    .attr('size',this.options.size)
-                                    .addClass ("ui-sb-select")
-                                    .appendTo (listwrapper);
-                                $("<br>").appendTo (listwrapper);
-                                 $('<input type="button" value="Delete" >')
-                                    .appendTo (listwrapper)
-                                    .addClass ("multi-part-element-btn-small")
-                                    .click(function(event) {
-                                        var key =  $("#"+that.options.id+"select_list").val();
-                                        $('option:selected',$("#"+that.options.id+"select_list")).remove();
-                                     });
-                        /*function removeIfInvalid(element) {
+                        var that = this,
+                              select = this.element.hide(),
+                              selected = select.children( ":selected" ),
+                              value = options.theSource && options.theSource.length >0 ? options.theSource[0]: "", //selected.val() ? selected.text() : "",
+                              wrapper = this.wrapper = $( "<span>" )
+                                     .addClass( "ui-combobox" )
+                                     .insertAfter( select );
+                                     
+                        function removeIfInvalid(element) {
                               var value = $( element ).val(),
                                      matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( value ) + "$", "i" ),
                                      valid = false;
@@ -118,9 +58,9 @@
                                      that.input.data( "autocomplete" ).term = "";
                                      return false;
                               }
-                        }*/
+                        }
 
-                       /* this.input = $( "<input>" )
+                        this.input = $( "<input>" )
                             .appendTo( wrapper )
                             .val( value )
                             .attr( "title", "" )
@@ -148,8 +88,8 @@
                                      .data( "item.autocomplete", item )
                                      .append( "<a>" + item.label + "</a>" )
                                      .appendTo( ul );
-                        };*/
-                        /*if (options.inputId){
+                        };
+                        if (options.inputId){
                             this.input.attr('id', options.inputId);
                         }
                         
@@ -157,6 +97,7 @@
                               .attr( "tabIndex", -1 )
                               .attr( "title", "Show All Items" )
                               .tooltip()
+                              .css("display","inline-block")
                               .appendTo( wrapper )
                               .button({
                                      icons: {
@@ -187,7 +128,7 @@
                                                    of: this.button
                                             },
                                             tooltipClass: "ui-state-highlight"
-                                     });*/
+                                     });
                  },
 
                  destroy: function() {
@@ -197,39 +138,3 @@
                  }
               });
        })( jQuery );
-       </script>
-        <script>
-        var aSource = ["red","green","blue"];
-       
-       $(function() {
-              $("#mysb").selectbuilder({id:"mysb_"});
-              
-       }); 
-       
-        $(document).ready(function() {
-            
-       });
-   
-       </script>
-</head>
-<body>
- 
-
- 
-<h1>jquery-selectbuilder demo (jQuery UI widget)</h1>
-<p>A custom widget built to allow user to create lists of single value or name/value pairs. </p>
-<div>Options:
-<ul>
-<li>id - id</li>
-
-</ul>
-</div>
-<h3>Example </h3>
-<div >
-      <div id="mysb"></div>
-</div>
-
-
-
-</body>
-</html>

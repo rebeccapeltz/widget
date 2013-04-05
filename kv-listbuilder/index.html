@@ -11,10 +11,13 @@
     <script src="src/jquery.combobox.js"></script>
     <script>
     (function( $ ) {
-            $.widget( "becky.selectbuilder", {
+            $.widget( "becky.kvlistbuilder", {
                  options: {
-                 id: null,
-                 size: '3'
+                 id: 'default',
+                 size: '3',
+                 nameList:[],
+                 nameData:{},
+                 removeFromNameSelectAfterUse: true
                 
                  },
                  /*getValue: function(){
@@ -36,54 +39,106 @@
                     this.input.autocomplete("option","source",this.options.theSource);
                     this.input.val(this.options.theSource && this.options.theSource.length >0 ? this.options.theSource[0]: "");
                  },*/
+                 _kvPair: function(key,value,display){
+                    var obj = {};
+                    obj.name = key ? key : '';
+                    obj.value = value ? value : '';
+                    obj.display = display ? display : '';
+                    return obj;
+                 },
+                 _kvPairJsonString: function(key,value,display){
+                    return JSON.stringify(this._kvPair(key,value,display));
+                 },
                  _create: function() {
                         var options = this.options;
+                        var NONE_TEXT = "None", NONE_VALUE = "none", REQUIRED_INDICATOR="*";
                         var that = this;
                         var select = this.element.hide(),
                                 selected = select.children( ":selected" ),
-                                //value = options.theSource && options.theSource.length >0 ? options.theSource[0]: "", //selected.val() ? selected.text() : "",
                                 wrapper = this.wrapper = $( "<div>" )
                                     .addClass( "multi-part-element" )
                                     .insertAfter( select );
                                 
                                 inputwrapper = this.inputwrapper = $("<div>")
-                                    .attr("id", that.options.id + "input_wrapper")
-                                    .appendTo (wrapper)
+                                    .attr("id", that.options.id + "_input_wrapper")
+                                    .appendTo (wrapper);
                                 listwrapper = this.listwrapper = $("<div>")
-                                    .attr("id", that.options.id + "list_wrapper")
-                                    .appendTo (wrapper)
+                                    .attr("id", that.options.id + "_list_wrapper")
+                                    .appendTo (wrapper);
                                 
-                                $("<span>")
-                                    .attr("id", that.options.id + "sb_cbo")
+                                //create and fill name select
+                                this.nameValue = $("<select>")
                                     .appendTo (inputwrapper)
-                                    .combobox ({inputId:that.options.id + "sb_cbo_value"});
+                                    .attr("id", that.options.id + "_kvlv_select_name");
+                                //if no name data set to 'None' and disable
+                                if (options.nameList.length === 0){
+                                    $("#" + that.options.id + "_kvlv_select_name")
+                                        .append($("<option></option>")
+                                        .attr("value",NONE_VALUE)
+                                        .text(NONE_TEXT))
+                                        .prop('disabled', true);
+                                    $("#" + that.options.id + "_kvlv_input_value")
+                                        .prop('disabled', true);
+                                } else {
+                                    $.each(options.nameList, function(key,value) { 
+                                        //mark if required
+                                        var display = that.options.nameData[value].required ? value +REQUIRED_INDICATOR : value;
+                                         $("#" + that.options.id + "_kvlv_select_name")
+                                             .append($("<option></option>")
+                                             .attr("value",value)
+                                             .text(display)); 
+                                    });
+                                }
                                  
                                 this.inputValue = $( "<input>" )
                                     .appendTo( inputwrapper )
                                     .attr( "title", "") 
-                                    .attr("id",that.options.id + "sb_input_value")
-                                    .css("margin-left","2.2em")
+                                    .attr("id",that.options.id + "_kvlv_input_value")
                                     .addClass( "ui-sb-value ui-sb-input" );
                                 this.addButton = $('<input type="button" value="Add" >')
                                     .appendTo (inputwrapper)
                                     .addClass ("multi-part-element-btn-small");
                                 this.addButton.click(
                                     function(event) {
-                                        var key = that.inputValue.val();
-                                        $("#"+that.options.id+"select_list")
+                                        var value = that.inputValue.val();
+                                        var name = that.nameValue.val();
+                                        var display = that.options.nameData[name].required ? name +REQUIRED_INDICATOR : name;
+                                        //don't add 'None' name or empty value to list
+                                        if (name === NONE_VALUE || value.length === 0) return;
+                                        //add kv pair to select list - values is stringified kv obj
+                                        $("#"+that.options.id+"_kvlv_final_list")
                                             .append($("<option></option>")
-                                            .attr("value",key)
-                                            .text(key));
+                                            .attr("value", that._kvPairJsonString(name,value,display))
+                                            .text(display + ' ' + value));
+                                        //update multi part hidden value
+                                        var currentHdnVal = JSON.parse($("#"+that.options.id + "_kvlv_hidden_input").val());
+                                        currentHdnVal.push(new that._kvPair(name,value,display));
+                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(currentHdnVal));
+                                        //remove option from name
+                                        if (that.options.removeFromNameSelectAfterUse){
+                                            $("#" + that.options.id + "_kvlv_select_name option[value='" + name + "']").remove();
+                                            //if name list is empty set to none and disable
+                                            if ($("select#" + that.options.id + "_kvlv_select_name option").length === 0){ 
+                                                $("#" + that.options.id + "_kvlv_select_name")
+                                                    .append($("<option></option>")
+                                                    .attr("value",NONE_VALUE)
+                                                    .text(NONE_TEXT))
+                                                    .prop('disabled', true);
+                                                $("#" + that.options.id + "_kvlv_input_value")
+                                                    .prop('disabled', true);
+                                            }
+                                        }
+                                        //clear value
                                         that.inputValue.val('');
                                      }
                                 );
 
-                                var valueWidth = $("#"+that.options.id+"sb_input_value").outerWidth(true),
-                                cboWidth = $("#"+that.options.id+"sb_cbo_value").outerWidth(true);
+                                var valueWidth = $("#"+that.options.id+"_kvlv_input_value").outerWidth(true),
+                                nameWidth = $("#"+that.options.id+"_kvlv_select_name").outerWidth(true);
                                 
                                 this.selectList = $("<select>")
-                                    .attr("id",that.options.id + "select_list")
-                                    .css('width',cboWidth + valueWidth)
+                                    .attr("id",that.options.id + "_kvlv_final_list")
+                                    .css('width', valueWidth + nameWidth)
                                     .attr('size',this.options.size)
                                     .addClass ("ui-sb-select")
                                     .appendTo (listwrapper);
@@ -92,10 +147,45 @@
                                     .appendTo (listwrapper)
                                     .addClass ("multi-part-element-btn-small")
                                     .click(function(event) {
-                                        var key =  $("#"+that.options.id+"select_list").val();
-                                        $('option:selected',$("#"+that.options.id+"select_list")).remove();
+                                        //remove none if more than 1
+                                        if ($("select#" + that.options.id + "_kvlv_select_name option").length == 1
+                                            &&  $("#" + that.options.id + "_kvlv_select_name option[value='none']")){
+                                            $("#" + that.options.id + "_kvlv_select_name option[value='none']").remove();
+                                            $("#" + that.options.id + "_kvlv_select_name")
+                                                .prop('disabled', false);
+                                            $("#" + that.options.id + "_kvlv_input_value")
+                                                .prop('disabled', false);
+                                        }
+                                        
+                                        //extract name and value
+                                        var kvPairStr =  $("#"+that.options.id+"_kvlv_final_list").val();
+                                        var kvPair = JSON.parse(kvPairStr);
+                                       
+                                        //add value back to end of select list
+                                        $("#" + that.options.id + "_kvlv_select_name")
+                                            .append("<option value='" + kvPair.name + "'>"+kvPair.display+"</option>");
+                                        
+                                        //delete from final list 
+                                        $('option:selected',$("#"+that.options.id+"_kvlv_final_list")).remove();
+                                        
+                                        //update hidden value
+                                        var hdnList=[];
+                                        $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
+                                            var valueObj = JSON.parse(this.value);
+                                            hdnList.push(valueObj);
+                                        });
+                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hdnList));  
+
+                                        
                                      });
-                        /*function removeIfInvalid(element) {
+                                     
+                                $("<input>")
+                                    .attr("id",that.options.id + "_kvlv_hidden_input")
+                                    .attr("type", "hidden")
+                                    .val(JSON.stringify([]))
+                                    .appendTo (wrapper)
+                                    
+                                   /*function removeIfInvalid(element) {
                               var value = $( element ).val(),
                                      matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( value ) + "$", "i" ),
                                      valid = false;
@@ -199,10 +289,12 @@
        })( jQuery );
        </script>
         <script>
-        var aSource = ["red","green","blue"];
-       
+       var nameList = ["color","shape","object"];
+       var nameData = {"color":{"required":true,"values":["red","green","blue"],"requiredValue":["red"]},"shape":{"required":false,"values":["round","square","triangle"],"requiredValue":["square"]},"object":{"required":true,"values":[],"requiredValue":[]}};
        $(function() {
-              $("#mysb").selectbuilder({id:"mysb_"});
+              $("#mylb1").kvlistbuilder({"id":"mykvlv1","nameList":nameList,"nameData":nameData});
+             
+               $("#mylb2").kvlistbuilder({"id":"mykvlv2"});
               
        }); 
        
@@ -216,17 +308,22 @@
  
 
  
-<h1>jquery-selectbuilder demo (jQuery UI widget)</h1>
+<h1>jquery-kv-listbuilder demo (jQuery UI widget)</h1>
 <p>A custom widget built to allow user to create lists of single value or name/value pairs. </p>
 <div>Options:
 <ul>
 <li>id - id</li>
+<li>size - size of key/value pair select list default 3</li>
+<li>nameList - json object contains source data for name field; format: </li>
+<li>nameData - json object contains source data for value field; format: </li>
+<li>removeFromNameSelectAfterUse - direction that remove name value once added to list; if removed from k/v pair list it's added back to name list</li>
 
 </ul>
 </div>
 <h3>Example </h3>
 <div >
-      <div id="mysb"></div>
+      <div id="mylb1"></div>
+       <div id="mylb2"></div>
 </div>
 
 
