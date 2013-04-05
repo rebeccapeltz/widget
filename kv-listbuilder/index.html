@@ -15,6 +15,7 @@
                  options: {
                  id: 'default',
                  size: '3',
+                 inputValueWidth:'200',
                  nameList:[],
                  nameData:{},
                  removeFromNameSelectAfterUse: true
@@ -24,25 +25,6 @@
                  NONE: "none",
                  REQUIRED_INDICATOR: "*",
 
-                 /*getValue: function(){
-                    return this.input.val();
-                 },
-                 removeFromSource: function(value){
-                    var newSource = [];
-                    for (var i=0;i<this.options.theSource.length;i++){
-                        if (this.options.theSource[i] !== value){
-                            newSource.push(this.options.theSource[i]);
-                        }
-                    }
-                    this.options.theSource = newSource;
-                    this.input.autocomplete("option","source",newSource);
-                    this.input.val(this.options.theSource && this.options.theSource.length >0 ? this.options.theSource[0]: "");
-                 },
-                 addToSource: function(value){
-                    this.options.theSource.push(value);
-                    this.input.autocomplete("option","source",this.options.theSource);
-                    this.input.val(this.options.theSource && this.options.theSource.length >0 ? this.options.theSource[0]: "");
-                 },*/
                  _kvPair: function(key,value,display){
                     var obj = {};
                     obj.name = key ? key : '';
@@ -90,14 +72,53 @@
                                 inputwrapper = this.inputwrapper = $("<div>")
                                     .attr("id", that.options.id + "_input_wrapper")
                                     .appendTo (wrapper);
+                                inputwrapperInputs = this.inputwrapperInputes = $("<span>")
+                                    .attr("id", that.options.id + "_input_wrapper_inputs")
+                                    .css('display','inline-block')
+                                    .appendTo (inputwrapper)
+                                   
                                 listwrapper = this.listwrapper = $("<div>")
                                     .attr("id", that.options.id + "_list_wrapper")
                                     .appendTo (wrapper);
                                 
                                 //create and fill name select
                                 this.nameValue = $("<select>")
-                                    .appendTo (inputwrapper)
+                                    .appendTo (inputwrapperInputs)
                                     .attr("id", that.options.id + "_kvlv_select_name");
+                                
+                                
+                                
+                                
+                                 //use name value to determine and set value input type
+                                var firstName = options.nameList.length >0 ?options.nameList[0] : that.NONE_VALUE;
+                                var firstObj = options.nameData[firstName];
+                                var inputDisplay = (!firstObj || firstObj.values.length === 0) ? 'inline-block' :that.NONE;
+                                var selectDisplay = (firstObj && firstObj.values.length > 0) ? 'inline-block' : that.NONE;
+                                
+                                this.inputValue = $( "<input>" )
+                                    .appendTo( inputwrapperInputs )
+                                    .attr( "title", "") 
+                                    .attr("id",that.options.id + "_kvlv_input_value")
+                                    .css('width', that.options.inputValueWidth)
+                                    .css('display',inputDisplay)
+                                    .addClass( "ui-sb-value ui-sb-input" );
+                                this.inputSelect = $( "<select>" )
+                                    .appendTo( inputwrapperInputs )
+                                    .attr( "title", "") 
+                                    .attr("id",that.options.id + "_kvlv_select_value")
+                                    .css('display',selectDisplay)
+                                    .addClass( "ui-sb-value_select" );
+                                //if there are values load select options
+                                if (selectDisplay !== that.NONE ){
+                                    $.each(firstObj.values, function(key,value) { 
+                                        //mark if required
+                                         $("#" + that.options.id + "_kvlv_select_value")
+                                             .append($("<option></option>")
+                                             .attr("value",value)
+                                             .text(value)); 
+                                    });
+                                } 
+
                                 //if no name data set to 'None' and disable
                                 if (options.nameList.length === 0){
                                     $("#" + that.options.id + "_kvlv_select_name")
@@ -117,52 +138,7 @@
                                              .text(display)); 
                                     });
                                 }
-                                
-                                 //use name value to determine and set value input type
-                                var firstName = options.nameList.length >0 ?options.nameList[0] : that.NONE_VALUE;
-                                var firstObj = options.nameData[firstName];
-                                var inputDisplay = (!firstObj || firstObj.values.length === 0) ? 'inline-block' :that.NONE;
-                                var selectDisplay = (firstObj && firstObj.values.length > 0) ? 'inline-block' : that.NONE;
-                                
-                                this.inputValue = $( "<input>" )
-                                    .appendTo( inputwrapper )
-                                    .attr( "title", "") 
-                                    .attr("id",that.options.id + "_kvlv_input_value")
-                                    .css('display',inputDisplay)
-                                    .addClass( "ui-sb-value ui-sb-input" );
-                                this.inputSelect = $( "<select>" )
-                                    .appendTo( inputwrapper )
-                                    .attr( "title", "") 
-                                    .attr("id",that.options.id + "_kvlv_select_value")
-                                    .css('display',selectDisplay)
-                                    .addClass( "ui-sb-value_select" );
-                                //if there are values load select options
-                                if (selectDisplay !== that.NONE ){
-                                    $.each(firstObj.values, function(key,value) { 
-                                        //mark if required
-                                         $("#" + that.options.id + "_kvlv_select_value")
-                                             .append($("<option></option>")
-                                             .attr("value",value)
-                                             .text(value)); 
-                                    });
-                                }   
-                                
-                                //use name value to determine and set value input type
-                               /* var firstName = options.nameList.length >0 ?options.nameList[0] : NONE_VALUE;
-                                $(function(name){
-                                    var obj = that.options.nameData[name];
-                                    if (obj && obj.values.length>0){
-                                        $("id",that.options.id + "_kvlv_select_value").css('visibility','visible');
-                                        $("id",that.options.id + "_kvlv_input_value").css('visibility','hidden'); 
-                                    } else {
-                                        $("id",that.options.id + "_kvlv_select_value").css('visibility','hidden');
-                                        $("id",that.options.id + "_kvlv_input_value").css('visibility','visible');
-                                    }
-                                }(firstName));
-                                */
-                                
-             
-                                
+ 
                                 this.addButton = $('<input type="button" value="Add" >')
                                     .appendTo (inputwrapper)
                                     .addClass ("multi-part-element-btn-small");
@@ -201,8 +177,8 @@
                                      }
                                 );
 
-                                var valueWidth = $("#"+that.options.id+"_kvlv_input_value").outerWidth(true),
-                                selectWidth = $("#"+that.options.id+"_kvlv_select_value").outerWidth(true),
+                                var valueWidth = $("#"+that.options.id+"_kvlv_input_value").innerWidth(),
+                                selectWidth = $("#"+that.options.id+"_kvlv_select_value").innerWidth(),
                                 nameWidth = $("#"+that.options.id+"_kvlv_select_name").outerWidth(true);
                                 
                                 this.selectList = $("<select>")
@@ -211,6 +187,10 @@
                                     .attr('size',this.options.size)
                                     .addClass ("ui-sb-select")
                                     .appendTo (listwrapper);
+                                
+                                $("#"+that.options.id + "_input_wrapper_inputs")
+                                    .css('width', valueWidth + nameWidth + selectWidth)
+                                
                                 $("<br>").appendTo (listwrapper);
                                 $('<input type="button" value="Delete" >')
                                     .appendTo (listwrapper)
@@ -261,99 +241,6 @@
                                     that._inputValueChange(that);
                                  });
                                     
-                                   /*function removeIfInvalid(element) {
-                              var value = $( element ).val(),
-                                     matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( value ) + "$", "i" ),
-                                     valid = false;
-                              select.children( "option" ).each(function() {
-                                     if ( $( this ).text().match( matcher ) ) {
-                                            this.selected = valid = true;
-                                            return false;
-                                     }
-                              });
-                               if ( !valid && options.force===true) {
-                                     // remove invalid value, as it didn't match anything
-                                     $( element )
-                                            .val(options.theSource[0]) //.val( "" )
-                                            .attr( "title", value + " didn't match any item - choose item from list" )
-                                            .tooltip( "open" );
-                                     select.val( "" );
-                                     setTimeout(function() {
-                                            that.input.tooltip( "close" ).attr( "title", "" );
-                                     }, 2500 );
-                                     that.input.data( "autocomplete" ).term = "";
-                                     return false;
-                              }
-                        }*/
-
-                       /* this.input = $( "<input>" )
-                            .appendTo( wrapper )
-                            .val( value )
-                            .attr( "title", "" )
-                            .addClass( "ui-state-default ui-combobox-input" )
-                            .autocomplete({
-                                     delay: 0,
-                                     minLength: 0,
-                                     source: options.theSource,
-                                     select: function( event, ui ) {
-                                            //ui.item.option.selected = true;
-                                            that._trigger( "selected", event, {
-                                                   //item: ui.item.option
-                                                   item: ui.item.value
-                                            });
-                                     },
-                                     change: function( event, ui ) {
-                                            if ( options.theSource && options.theSource.length>0 &&  !ui.item )
-                                                   return removeIfInvalid( this );
-                                            //var v =$(this).val();
-                                     }
-                              })
-                              .addClass( "ui-widget ui-widget-content ui-corner-left" );
-                        this.input.data( "autocomplete" )._renderItem = function( ul, item ) {
-                              return $( "<li>" )
-                                     .data( "item.autocomplete", item )
-                                     .append( "<a>" + item.label + "</a>" )
-                                     .appendTo( ul );
-                        };*/
-                        /*if (options.inputId){
-                            this.input.attr('id', options.inputId);
-                        }
-                        
-                       $( "<a>" )
-                              .attr( "tabIndex", -1 )
-                              .attr( "title", "Show All Items" )
-                              .tooltip()
-                              .appendTo( wrapper )
-                              .button({
-                                     icons: {
-                                            primary: "ui-icon-triangle-1-s"
-                                     },
-                                     text: false
-                              })
-                              .removeClass( "ui-corner-all" )
-                              .addClass( "ui-corner-right ui-combobox-toggle" )
-                              .click(function() {
-                                     // close if already visible
-                                     if ( that.input.autocomplete( "widget" ).is( ":visible" ) ) {
-                                            input.autocomplete( "close" );
-                                            //removeIfInvalid( input );
-                                            return;
-                                     }
-
-                                     // work around a bug (likely same cause as #5265)
-                                     $( this ).blur();
-
-                                     // pass empty string as value to search for, displaying all results
-                                     that.input.autocomplete( "search", "" );
-                                     that.input.focus();
-                              });
-
-                              that.input.tooltip({
-                                            position: {
-                                                   of: this.button
-                                            },
-                                            tooltipClass: "ui-state-highlight"
-                                     });*/
                  },
 
                  destroy: function() {
@@ -367,12 +254,6 @@
         <script>
        var nameList = ["color","shape","object"];
        var nameData = {"color":{"required":true,"values":["red","green","blue"],"requiredValue":["red"]},"shape":{"required":false,"values":["round","square","triangle"],"requiredValue":["square"]},"object":{"required":true,"values":[],"requiredValue":[]}};
-       $(function() {
-             // $("#mylb1").kvlistbuilder({"id":"mykvlv1","nameList":nameList,"nameData":nameData});
-             
-              // $("#mylb2").kvlistbuilder({"id":"mykvlv2"});
-              
-       }); 
        
         $(document).ready(function() {
             $("#mylb1").kvlistbuilder({"id":"mykvlv1","nameList":nameList,"nameData":nameData});
