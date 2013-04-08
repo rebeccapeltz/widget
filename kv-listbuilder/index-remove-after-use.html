@@ -18,8 +18,7 @@
                  inputValueWidth:'200',
                  nameList:[],
                  nameData:{},
-                 uniqueKey: true,
-                 uniqueKV: false
+                 removeFromNameSelectAfterUse: true
                  },
                  NONE_TEXT: "None",
                  NONE_VALUE: "none",
@@ -59,20 +58,7 @@
                         });
                     }   
                  },
-                 _refresh: function(options){
-                    //select first
-                    if (!options){
-                        options = this.options;
-                    }
-                    $("#" + options.id + "_kvlv_select_name").val($("#" + options.id + "_kvlv_select_name option:first").val());
-                    $("#" + options.id + "_kvlv_select_name").change();
-                    $("#" + options.id + "_kvlv_input_value").val('');
-                 },
-                 _clearSelected: function(selectElement){
-                    $(selectElement).find('option').each(function(){
-                       $(this).removeAttr("selected");
-                    });
-                  },
+                
                  _create: function() {
                         var options = this.options;
                         //var NONE_TEXT = "None", NONE_VALUE = "none", NONE="none", REQUIRED_INDICATOR="*";
@@ -158,52 +144,44 @@
                                     .addClass ("multi-part-element-btn-small");
                                 this.addButton.click(
                                     function(event) {
-                                        that._clearSelected($("#"+that.options.id+"_kvlv_final_list"));
                                         var value = that.inputValue.is(":visible") ? that.inputValue.val() : (that.inputSelect.is(":visible") ? that.inputSelect.val() : "");
                                         var name = that.nameValue.val();
                                         var display = (that.options.nameData[name] && that.options.nameData[name].required) ? name + that.REQUIRED_INDICATOR : name;
+                                        //don't add 'None' name or empty value to list
+                                        if (name === that.NONE_VALUE || value.length === 0) return;
+                                        //add kv pair to select list - values is stringified kv obj
+                                        $("#"+that.options.id+"_kvlv_final_list")
+                                            .append($("<option></option>")
+                                            .attr("value", that._kvPairJsonString(name,value,display))
+                                            .text(display + ' ' + value));
+                                        //update multi part hidden value
                                         var currentHdnVal = JSON.parse($("#"+that.options.id + "_kvlv_hidden_input").val());
-                                        var keyInList = currentHdnVal[name] ? true :false;
-                                        //don't add 'None' name to list
-                                        if (name === that.NONE_VALUE) return;
+                                        currentHdnVal.push(new that._kvPair(name,value,display));
+                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(currentHdnVal));
+                                        //remove option from name
+                                        if (that.options.removeFromNameSelectAfterUse){
+                                            $("#" + that.options.id + "_kvlv_select_name option[value='" + name + "']").remove();
+                                            //if name list is empty set to none and disable
+                                            if ($("select#" + that.options.id + "_kvlv_select_name option").length === 0){ 
+                                                $("#" + that.options.id + "_kvlv_select_name")
+                                                    .append($("<option></option>")
+                                                    .attr("value", that.NONE_VALUE)
+                                                    .text( that.NONE_TEXT))
+                                                    .prop('disabled', true);
+                                                $("#" + that.options.id + "_kvlv_input_value")
+                                                    .prop('disabled', true);
+                                            }
+                                        }
                                         
-                                        //if uniqueKey is maintained: if exists overwrite value, otherwise add to end
-                                        if (that.options.uniqueKey && keyInList){
-                                            //if key in list update value
-                                            currentHdnVal[name].value = value;
-                                            currentHdnVal[name].display = display;
-                                            //update select list
-                                            $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
-                                                var valueObj = JSON.parse(this.value);
-                                                if (valueObj.name === name){
-                                                    $(this).text(display + ' ' + value)
-                                                    $(this).val(that._kvPairJsonString(name,value,display));
-                                                    $(this).attr("selected","selected");
-                                                    return;
-                                                }
-                                            });
-                                        } else {
-                                            //just add to list
-                                            currentHdnVal[name] =  new that._kvPair(name,value,display);
-                                            $("#"+that.options.id+"_kvlv_final_list")
-                                                .append($("<option></option>")
-                                                .attr("value", that._kvPairJsonString(name,value,display))
-                                                .attr("selected", "selected")
-                                                .text(display + ' ' + value));
-                                            
-                                        }   
-                                        $("#"+that.options.id + "_kvlv_hidden_input")
-                                                .val(JSON.stringify(currentHdnVal))
-
+                                        that._inputValueChange(that);
                                      }
                                 );
 
-                                //set width
                                 var valueWidth = $("#"+that.options.id+"_kvlv_input_value").innerWidth(),
                                 selectWidth = $("#"+that.options.id+"_kvlv_select_value").innerWidth(),
                                 nameWidth = $("#"+that.options.id+"_kvlv_select_name").outerWidth(true);
                                 
-                                //final list
+                                
                                 this.selectList = $("<select>")
                                     .attr("id",that.options.id + "_kvlv_final_list")
                                     .css('width', valueWidth + nameWidth + selectWidth)
@@ -214,155 +192,55 @@
                                 $("#"+that.options.id + "_input_wrapper_inputs")
                                     .css('width', valueWidth + nameWidth + selectWidth)
                                 
-                                
-                                
                                 $("<br>").appendTo (listwrapper);
-                                
-                                $('<input type="button" value="Up" >')
+                                $('<input type="button" value="Delete" >')
                                     .appendTo (listwrapper)
                                     .addClass ("multi-part-element-btn-small")
                                     .click(function(event) {
-                                        
-                                        //extract name and value
-                                        var kvPairStr =  $("#"+that.options.id+"_kvlv_final_list").val();
-                                        var kvPair = JSON.parse(kvPairStr);
-                                  /*      
-                                        //delete from final list 
-                                        $('option:selected',$("#"+that.options.id+"_kvlv_final_list")).remove();
-                                        
-                                        //update hidden value
-                                        var hiddenObj={};
-                                        $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
-                                            var valueObj = JSON.parse(this.value);
-                                            hiddenObj[valueObj.name] = valueObj;
-                                        });
-                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));  
-                                        
-                                        //adjust input values
-                                        that._inputValueChange(that);*/
-                                        
-                                     });
-                                $('<input type="button" value="Down" >')
-                                    .appendTo (listwrapper)
-                                    .addClass ("multi-part-element-btn-small")
-                                    .click(function(event) {
-                                        //get selected index
-                                        if ($("#"+that.options.id+"_kvlv_final_list option:selected")){
-                                            var kvPairStr =  $("#"+that.options.id+"_kvlv_final_list").val();
-                                            var kvPair = JSON.parse(kvPairStr);
-                                        
-                                            var indexSelected = $("#"+that.options.id+"_kvlv_final_list option")
-                                                .index($("#"+that.options.id+"_kvlv_final_list option:selected"));
-                                            var sizeOfList = $("#"+that.options.id+"_kvlv_final_list option").size();
-                                            
-                                            //remove original
-                                            $("#"+that.options.id+"_kvlv_final_list option:eq(" + (indexSelected) +")").remove();
-                                            
-                                            //add a copy to be moved
-                                            if ((indexSelected )< sizeOfList){
-                                                $("#"+that.options.id+"_kvlv_final_list option:eq(" + (indexSelected) +")")
-                                                    .after("<option value='"+ kvPairStr+"'>"+ kvPair.display + ' ' + kvPair.value +"</option>");
-                                            }
-                                           
-
-                                            //update hidden value
-                                            var hiddenObj={};
-                                            $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
-                                                var valueObj = JSON.parse(this.value);
-                                                hiddenObj[valueObj.name] = valueObj;
-                                            });
-                                            $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));  
-                                            
-                                            }
-                                        
-                                       
-                                        //unselect
-                                        
-                                     });
-                                     
-                                $('<input type="button" value="Edit" >')
-                                    .appendTo (listwrapper)
-                                    .addClass ("multi-part-element-btn-small")
-                                    .click(function(event) {
+                                        //remove none if more than 1
+                                        if ($("select#" + that.options.id + "_kvlv_select_name option").length == 1
+                                            &&  $("#" + that.options.id + "_kvlv_select_name option[value='none']")){
+                                            $("#" + that.options.id + "_kvlv_select_name option[value='none']").remove();
+                                            $("#" + that.options.id + "_kvlv_select_name")
+                                                .prop('disabled', false);
+                                            $("#" + that.options.id + "_kvlv_input_value")
+                                                .prop('disabled', false);
+                                        }
                                         
                                         //extract name and value
                                         var kvPairStr =  $("#"+that.options.id+"_kvlv_final_list").val();
                                         var kvPair = JSON.parse(kvPairStr);
                                        
+                                        //add value back to end of select list
+                                        $("#" + that.options.id + "_kvlv_select_name")
+                                            .append("<option value='" + kvPair.name + "'>"+kvPair.display+"</option>");
+                                        
                                         //delete from final list 
                                         $('option:selected',$("#"+that.options.id+"_kvlv_final_list")).remove();
                                         
                                         //update hidden value
-                                        var hiddenObj={};
+                                        var hdnList=[];
                                         $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
                                             var valueObj = JSON.parse(this.value);
-                                            hiddenObj[valueObj.name] = valueObj;
+                                            hdnList.push(valueObj);
                                         });
-                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));  
+                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hdnList));  
                                         
                                         //adjust input values
                                         that._inputValueChange(that);
                                         
                                      });
-                                
-                                
-                                $('<input type="button" value="Delete" >')
-                                    .appendTo (listwrapper)
-                                    .addClass ("multi-part-element-btn-small")
-                                    .click(function(event) {
-                                        
-                                        //extract name and value
-                                        var kvPairStr =  $("#"+that.options.id+"_kvlv_final_list").val();
-                                        var kvPair = JSON.parse(kvPairStr);
-                                        
-                                        //delete from final list 
-                                        $('option:selected',$("#"+that.options.id+"_kvlv_final_list")).remove();
-                                        
-                                        //update hidden value
-                                        var hiddenObj={};
-                                        $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
-                                            var valueObj = JSON.parse(this.value);
-                                            hiddenObj[valueObj.name] = valueObj;
-                                        });
-                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));  
-                                        
-                                        //reset input values
-                                        that._refresh(that.options);
-                                        
-                                     });
-                                
                                      
                                 $("<input>")
                                     .attr("id",that.options.id + "_kvlv_hidden_input")
                                     .attr("type", "hidden")
-                                    .val(JSON.stringify({}))
+                                    .val(JSON.stringify([]))
                                     .appendTo (wrapper);
                                 
-                                $("#" + options.id + "_kvlv_select_name").change(function(){
+                                 $("#" + options.id + "_kvlv_select_name").change(function(){
                                     //adjust input values
                                     that._inputValueChange(that);
-                                });
-                                
-                                $("#" + options.id + "_kvlv_final_list").change(function(){
-                                    //populate name and value
-                                    //var selectedIndex = $(this + " option").index( $(this + " option:selected")); 
-                                    var selectedVal = $(this).val();
-                                    var listValue = JSON.parse(this.value);
-                                    var name=listValue.name, val = listValue.value;
-                                    
-                                    //reset "selected"
-                                    that._clearSelected($("#"+that.options.id+"_kvlv_final_list"));  
-                                    $("#"+that.options.id+"_kvlv_final_list option[value='" + selectedVal +"']").attr("selected", "selected");
-                                    
-                                    //$(this + " option:eq(" + selectedIndex + ")").attr("selected","selected");
-                                    var options = $(this).find('option');
-                                   
-                                    //set select input or 
-                                    $("#"+that.options.id + "_kvlv_select_name").val(name);
-                                    $("#"+that.options.id + "_kvlv_select_name").change();
-                                    $("#"+that.options.id + "_kvlv_input_value").val(val);
-                                   
-                                });
+                                 });
                                     
                  },
 
