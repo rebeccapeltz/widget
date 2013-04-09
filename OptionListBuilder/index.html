@@ -8,16 +8,16 @@
     <script src="lib/jquery-1.7.1.min.js"></script>
     <script src="lib/jquery-ui-1.9.2.min.js"></script>
     <link rel="stylesheet" href="demo.css">
-    <script src="src/jquery.kvlistbuilder.js"></script>
+    <script src="src/jquery.optionlistbuilder.js"></script>
 
         <script>
        var nameList = ["color","shape","object"];
        var nameData = {"color":{"required":true,"values":["red","green","blue"],"requiredValue":["red"]},"shape":{"required":false,"values":["round","square","triangle"],"requiredValue":["square"]},"object":{"required":true,"values":[],"requiredValue":[]}};
        
         $(document).ready(function() {
-            $("#mylb1").kvlistbuilder({"id":"mykvlv1","nameList":nameList,"nameData":nameData,"uniqueKey":true});
-            $("#mylb2").kvlistbuilder({"id":"mykvlv2","nameList":nameList,"nameData":nameData});
-            $("#mylb3").kvlistbuilder({"id":"mykvlv3","onAfterDelete":function(dataDeleted){alert(dataDeleted);}});
+            $("#mylb1").optionlistbuilder({"id":"mykvlv1","nameList":nameList,"nameData":nameData,"uniqueKey":true});
+            $("#mylb2").optionlistbuilder({"id":"mykvlv2","nameList":nameList,"nameData":nameData});
+            $("#mylb3").optionlistbuilder({"id":"mykvlv3","onAfterDelete":function(dataDeleted){alert(dataDeleted);}});
        });
    
        </script>
@@ -26,15 +26,15 @@
  
 
  
-<h1>jquery-kv-listbuilder demo (jQuery UI widget)</h1>
-<p>A custom widget built to allow user to create lists of single value or name/value pairs. </p>
+<h1>jquery-option-listbuilder demo (jQuery UI widget)</h1>
+<p>A custom widget built to allow user to create lists of options.  Options consist of name:value pairs.  If names are not provided a list of values only is built. </p>
 <div>Options:
 <ul>
-<li>id - id</li>
-<li>size - size of key/value pair select list default 3</li>
-<li>uniqueKey: false</li>
-<li>onAfterAdd: function(valueAddedString){}</li>
-<li>onAfterDelete: function(valueDeletedString){}</li>
+<li>id - used to ensure unique ids in page; default is "default"</li>
+<li>size - size of final rendered list of options; default is 3</li>
+<li>uniqueKey - force the name (key) to be unique; default is false; you cannot have a unique key if you do not provide a nameList</li>
+<li>onAfterAdd - allow calling function to define a callback to be executed after an option is added to the list; function provides string added to list as argument; default is do nothing</li>
+<li>onAfterDelete: allow calling function to define a callback to be executed after an option is delete from the list; function provides string delete from list as argument; default is do nothing</li>
 <li>nameList - json object contains source data for name field; format: 
 <pre><code>
 [
