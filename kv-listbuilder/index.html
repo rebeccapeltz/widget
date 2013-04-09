@@ -18,8 +18,7 @@
                  inputValueWidth:'200',
                  nameList:[],
                  nameData:{},
-                 uniqueKey: true,
-                 uniqueKV: false
+                 uniqueKey: true
                  },
                  NONE_TEXT: "None",
                  NONE_VALUE: "none",
@@ -73,6 +72,14 @@
                        $(this).removeAttr("selected");
                     });
                   },
+                 _updateHiddenInput: function(that){
+                    var hiddenArray=[];
+                    $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
+                        var valueObj = JSON.parse(this.value);
+                        hiddenArray.push(valueObj);
+                    });
+                    $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenArray));  
+                 },
                  _create: function() {
                         var options = this.options;
                         //var NONE_TEXT = "None", NONE_VALUE = "none", NONE="none", REQUIRED_INDICATOR="*";
@@ -100,38 +107,20 @@
                                     .appendTo (inputwrapperInputs)
                                     .attr("id", that.options.id + "_kvlv_select_name");
                                 
-                                
-                                
-                                
-                                 //use name value to determine and set value input type
-                                var firstName = options.nameList.length >0 ?options.nameList[0] : that.NONE_VALUE;
-                                var firstObj = options.nameData[firstName];
-                                var inputDisplay = (!firstObj || firstObj.values.length === 0) ? 'inline-block' :that.NONE;
-                                var selectDisplay = (firstObj && firstObj.values.length > 0) ? 'inline-block' : that.NONE;
-                                
                                 this.inputValue = $( "<input>" )
                                     .appendTo( inputwrapperInputs )
                                     .attr( "title", "") 
                                     .attr("id",that.options.id + "_kvlv_input_value")
                                     .css('width', that.options.inputValueWidth)
-                                    .css('display',inputDisplay)
+                                    //.css('display',inputDisplay)
                                     .addClass( "ui-sb-value ui-sb-input" );
                                 this.inputSelect = $( "<select>" )
                                     .appendTo( inputwrapperInputs )
                                     .attr( "title", "") 
                                     .attr("id",that.options.id + "_kvlv_select_value")
-                                    .css('display',selectDisplay)
+                                   // .css('display',selectDisplay)
                                     .addClass( "ui-sb-value_select" );
-                                //if there are values load select options
-                                if (selectDisplay !== that.NONE ){
-                                    $.each(firstObj.values, function(key,value) { 
-                                        //mark if required
-                                         $("#" + that.options.id + "_kvlv_select_value")
-                                             .append($("<option></option>")
-                                             .attr("value",value)
-                                             .text(value)); 
-                                    });
-                                } 
+                               
 
                                 //if no name data set to 'None' and disable
                                 if (options.nameList.length === 0){
@@ -152,26 +141,39 @@
                                              .text(display)); 
                                     });
                                 }
+                                //update value entry (input or select)
+                                that._inputValueChange(that);
  
                                 this.addButton = $('<input type="button" value="Add" >')
                                     .appendTo (inputwrapper)
                                     .addClass ("multi-part-element-btn-small");
                                 this.addButton.click(
                                     function(event) {
+                                        //unique key is optional, but unique key/value is mandatory
                                         that._clearSelected($("#"+that.options.id+"_kvlv_final_list"));
                                         var value = that.inputValue.is(":visible") ? that.inputValue.val() : (that.inputSelect.is(":visible") ? that.inputSelect.val() : "");
                                         var name = that.nameValue.val();
                                         var display = (that.options.nameData[name] && that.options.nameData[name].required) ? name + that.REQUIRED_INDICATOR : name;
                                         var currentHdnVal = JSON.parse($("#"+that.options.id + "_kvlv_hidden_input").val());
-                                        var keyInList = currentHdnVal[name] ? true :false;
-                                        //don't add 'None' name to list
-                                        if (name === that.NONE_VALUE) return;
                                         
-                                        //if uniqueKey is maintained: if exists overwrite value, otherwise add to end
-                                        if (that.options.uniqueKey && keyInList){
-                                            //if key in list update value
-                                            currentHdnVal[name].value = value;
-                                            currentHdnVal[name].display = display;
+                                        //determine if key and key/val already used
+                                        var keyInList =false,keyValInList = false;
+                                        for (var i=0;i<currentHdnVal.length;i++){
+                                            hdnName = currentHdnVal[i].name;
+                                            hdnValue = currentHdnVal[i].value;
+                                            keyInList = keyInList || (name === hdnName);
+                                            if (name === hdnName && value === hdnValue){
+                                                keyValInList = true;
+                                                break;
+                                            } 
+                                        } 
+                                        
+                                        //if key/val already used or uniqueKey is maintained upda
+                                        if (keyValInList) {
+                                            //hilight based on key/val
+                                            var valStr = that._kvPairJsonString(name,value,display);
+                                            $("#"+that.options.id+"_kvlv_final_list option[value='" + valStr +"']").attr("selected", "selected");  
+                                        } else  if (that.options.uniqueKey && keyInList){ 
                                             //update select list
                                             $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
                                                 var valueObj = JSON.parse(this.value);
@@ -184,16 +186,15 @@
                                             });
                                         } else {
                                             //just add to list
-                                            currentHdnVal[name] =  new that._kvPair(name,value,display);
                                             $("#"+that.options.id+"_kvlv_final_list")
                                                 .append($("<option></option>")
                                                 .attr("value", that._kvPairJsonString(name,value,display))
                                                 .attr("selected", "selected")
                                                 .text(display + ' ' + value));
                                             
-                                        }   
-                                        $("#"+that.options.id + "_kvlv_hidden_input")
-                                                .val(JSON.stringify(currentHdnVal))
+                                        }
+                                        //update hidden value 
+                                        that._updateHiddenInput(that);
 
                                      }
                                 );
@@ -215,7 +216,7 @@
                                     .css('width', valueWidth + nameWidth + selectWidth)
                                 
                                 
-                                
+                                //buttons
                                 $("<br>").appendTo (listwrapper);
                                 
                                 $('<input type="button" value="Up" >')
@@ -228,25 +229,22 @@
                                             var kvPair = JSON.parse(kvPairStr);
                                     
                                             var indexSelected = $("#"+that.options.id+"_kvlv_final_list option")
-                                            .index($("#"+that.options.id+"_kvlv_final_list option:selected"));
-                                        
-                                            //remove original
-                                            $("#"+that.options.id+"_kvlv_final_list option:eq(" + (indexSelected) +")").remove();
+                                            .index($("#"+that.options.id+"_kvlv_final_list option:selected"));  
                                         
                                             //add a copy to be moved
                                             if (indexSelected > 0){
+                                                //remove original
+                                                $("#"+that.options.id+"_kvlv_final_list option:eq(" + (indexSelected) +")").remove();
+                                            
                                                 $("#"+that.options.id+"_kvlv_final_list option:eq(" + (indexSelected-1) +")")
                                                     .before("<option value='"+ kvPairStr+"'>"+ kvPair.display + ' ' + kvPair.value +"</option>");
+                                                    
+                                                //update hidden value 
+                                                that._updateHiddenInput(that);
+                                               
+                                                //highlight base on value
+                                                $("#"+that.options.id+"_kvlv_final_list option[value='" + kvPairStr +"']").attr("selected", "selected");  
                                             }
-                                       
-
-                                            //update hidden value  //////REFACTOR
-                                            var hiddenObj={};
-                                            $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
-                                                var valueObj = JSON.parse(this.value);
-                                                hiddenObj[valueObj.name] = valueObj;
-                                            });
-                                            $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));  
                                         }
                                      });
                                 $('<input type="button" value="Down" >')
@@ -262,25 +260,21 @@
                                                 .index($("#"+that.options.id+"_kvlv_final_list option:selected"));
                                             var sizeOfList = $("#"+that.options.id+"_kvlv_final_list option").size();
                                             
-                                            //remove original
-                                            $("#"+that.options.id+"_kvlv_final_list option:eq(" + (indexSelected) +")").remove();
-                                            
                                             //add a copy to be moved
-                                            if ((indexSelected )< sizeOfList){
-                                                $("#"+that.options.id+"_kvlv_final_list option:eq(" + (indexSelected) +")")
+                                            if (indexSelected < (sizeOfList-1)){
+                                                $("#"+that.options.id+"_kvlv_final_list option:eq(" + (indexSelected + 1) +")")
                                                     .after("<option value='"+ kvPairStr+"'>"+ kvPair.display + ' ' + kvPair.value +"</option>");
-                                            }
-                                           
+                                                //remove original
+                                                $("#"+that.options.id+"_kvlv_final_list option:eq(" + (indexSelected) +")").remove();
+                                                
+                                                //update hidden value  
+                                                that._updateHiddenInput(that);
+                                                
+                                                //highlight base on value
+                                                $("#"+that.options.id+"_kvlv_final_list option[value='" + kvPairStr +"']").attr("selected", "selected");  
 
-                                            //update hidden value
-                                            var hiddenObj={};
-                                            $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
-                                                var valueObj = JSON.parse(this.value);
-                                                hiddenObj[valueObj.name] = valueObj;
-                                            });
-                                            $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));  
-                                            
                                             }
+                                        }
                                      });
                                      
                                 $('<input type="button" value="Edit" >')
@@ -296,12 +290,13 @@
                                         $('option:selected',$("#"+that.options.id+"_kvlv_final_list")).remove();
                                         
                                         //update hidden value
-                                        var hiddenObj={};
+                                        that._updateHiddenInput(that);
+                                        /*var hiddenObj={};
                                         $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
                                             var valueObj = JSON.parse(this.value);
                                             hiddenObj[valueObj.name] = valueObj;
                                         });
-                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));  
+                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));*/  
                                         
                                         //adjust input values
                                         that._inputValueChange(that);
@@ -322,19 +317,20 @@
                                         $('option:selected',$("#"+that.options.id+"_kvlv_final_list")).remove();
                                         
                                         //update hidden value
-                                        var hiddenObj={};
+                                        that._updateHiddenInput(that);
+                                        /*var hiddenObj={};
                                         $("#"+that.options.id+"_kvlv_final_list > option").each(function() {
                                             var valueObj = JSON.parse(this.value);
                                             hiddenObj[valueObj.name] = valueObj;
                                         });
-                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));  
+                                        $("#"+that.options.id + "_kvlv_hidden_input").val(JSON.stringify(hiddenObj));*/  
                                         
                                         //reset input values
                                         that._refresh(that.options);
                                         
                                      });
                                 
-                                     
+                                //hidden value     
                                 $("<input>")
                                     .attr("id",that.options.id + "_kvlv_hidden_input")
                                     .attr("type", "hidden")
@@ -346,6 +342,7 @@
                                     that._inputValueChange(that);
                                 });
                                 
+                                //selecting final list
                                 $("#" + options.id + "_kvlv_final_list").change(function(){
                                     //populate name and value
                                     //var selectedIndex = $(this + " option").index( $(this + " option:selected")); 
@@ -383,7 +380,7 @@
        
         $(document).ready(function() {
             $("#mylb1").kvlistbuilder({"id":"mykvlv1","nameList":nameList,"nameData":nameData});
-            $("#mylb2").kvlistbuilder({"id":"mykvlv2"});
+            $("#mylb2").kvlistbuilder({"id":"mykvlv2","nameList":nameList,"nameData":nameData,"uniqueKey":false});
        });
    
        </script>
