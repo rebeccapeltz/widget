@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>jQuery UI Select Builder</title>
+    <!--<link rel="stylesheet" href="custom-theme/jquery-ui-1.9.2.custom.min.css">-->
+    <link rel="stylesheet" href="themes/smoothness/jquery-ui-all.css" />
+
+    <!--link rel="stylesheet" href="screen.css" -->
+    <link rel="stylesheet" href="demo.css">
+    <script src="lib/jquery-1.7.1.min.js"></script>
+    <script src="lib/jquery-ui-1.9.2.min.js"></script>
+
+    <script src="src/jquery.optionlistbuilder.js"></script>
+
+        <script>
+        var dataMap = {"l7dosenable":{"valueSelectList":["from-profile"],"validationName":"dos-profile","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-methodreplace":{"valueSelectList":["value","value"],"validationName":"method","requiredValueList":["value","value"],"isRequired":"true","type":"","defaultValue":""},"forwardselect":{"valueSelectList":["pool","clone-pool","node","member","snat","snatpool","nexthop","vlan","vlan-id","rateclass"],"validationName":"rateclass","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"logwrite":{"valueSelectList":["message"],"validationName":"none","requiredValueList":["message"],"isRequired":"true","type":"","defaultValue":""},"http-cookieinsert":{"valueSelectList":["name","value"],"validationName":"none","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-headerinsert":{"valueSelectList":["name","value"],"validationName":"none","requiredValueList":["name","value"],"isRequired":"true","type":"","defaultValue":""},"http-refererinsert":{"valueSelectList":["value"],"validationName":"url","requiredValueList":["value"],"isRequired":"true","type":"","defaultValue":""},"http-urireplace":{"valueSelectList":["value","path","query-string"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-basic-authinsert":{"valueSelectList":["username","password"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"asmenable":{"valueSelectList":["policy"],"validationName":"asm-policy","requiredValueList":["policy"],"isRequired":"true","type":"","defaultValue":""},"http-cookieremove":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-headerremove":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"pemclassify":{"valueSelectList":["application","category","protocol","defer"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-hostreplace":{"valueSelectList":["value"],"validationName":"host","requiredValueList":["value"],"isRequired":"true","type":"","defaultValue":""},"http-headerreplace":{"valueSelectList":["name","value"],"validationName":"none","requiredValueList":["name","value"],"isRequired":"true","type":"","defaultValue":""},"http-set-cookieremove":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"cacheenable":{"valueSelectList":["pin"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-replyredirect":{"valueSelectList":["location"],"validationName":"url","requiredValueList":["location"],"isRequired":"true","type":"","defaultValue":""},"tclset-variable":{"valueSelectList":["name","expression"],"validationName":"tcl","requiredValueList":["name","expression"],"isRequired":"true","type":"","defaultValue":""},"http-basic-authreplace":{"valueSelectList":["username","password"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-refererreplace":{"valueSelectList":["value"],"validationName":"url","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-set-cookieinsert":{"valueSelectList":["name","value","domain","path"],"validationName":"path","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""}};
+       var nameList = ["color","shape","object"];
+       var nameData = {"color":{"required":true,"values":["red","green","blue"],"requiredValue":["red"]},"shape":{"required":false,"values":["round","square","triangle"],"requiredValue":["square"]},"object":{"required":true,"values":[],"requiredValue":[]}};
+       
+        $(document).ready(function() {
+            $("#example_select").change(function(){
+                $("#mylb1").optionlistbuilder("dependentElementValueChange");
+            });
+        
+            $("#mylb1").optionlistbuilder({"id":"mykvlv1","dependElementId":"example_select","dataMap":dataMap,"uniqueKey":true});
+            //$("#mylb2").optionlistbuilder({"id":"mykvlv2","nameList":nameList,"nameData":nameData});
+            //$("#mylb3").optionlistbuilder({"id":"mykvlv3","onAfterDelete":function(dataDeleted){alert(dataDeleted);}});
+       });
+       
+       
+   
+       </script>
+</head>
+<body>
+ 
+
+ 
+<h1>jquery-option-listbuilder demo (jQuery UI widget)</h1>
+<p>A custom widget built to allow user to create lists of options.  Options consist of name:value pairs.  If names are not provided a list of values only is built. </p>
+<div>Options:
+<ul>
+<li>id - used to ensure unique ids in page; default is "default"</li>
+<li>size - size of final rendered list of options; default is 3</li>
+<li>uniqueKey - force the name (key) to be unique; default is false; you cannot have a unique key if you do not provide a nameList</li>
+<li>onAfterAdd - allow calling function to define a callback to be executed after an option is added to the list; function provides string added to list as argument; default is do nothing</li>
+<li>onAfterDelete: allow calling function to define a callback to be executed after an option is delete from the list; function provides string delete from list as argument; default is do nothing</li>
+<li>dataMap - json object contains source data for name field; format: 
+<pre><code>
+{
+    "l7dosenable": {
+        "valueSelectList": [
+            "from-profile"
+        ],
+        "validationName": "dos-profile",
+        "requiredValueList": [],
+        "isRequired": "false",
+        "type": "",
+        "defaultValue": ""
+    },
+    "http-methodreplace": {
+        "valueSelectList": [
+            "value",
+            "value"
+        ],
+        "validationName": "method",
+        "requiredValueList": [
+            "value",
+            "value"
+        ],
+        "isRequired": "true",
+        "type": "",
+        "defaultValue": ""
+    }
+}
+</code></pre>
+</li>
+</ul>
+</div>
+<h3>Example </h3>
+<div >
+      <h4>Name list and data + unique key (name) is true</h4>
+      <div><select id="example_select">
+      <option value="l7dosenable">l7dosenable</option>
+      <option value="http-refererreplace">http-refererreplace</option>
+      <option value="http-headerinsert">http-headerinsert</option>
+      <option value="http-hostreplace">http-hostreplace</option>
+      <option value="forwardselect">forwardselect</option>
+      </select></div>
+      <div id="mylb1"></div>
+      <h4>Name list and data + unique key (name) is false</h4>
+      <div id="mylb2"></div>
+     <!-- <h4>Value only (no name list + unique key is false)</h4>
+      <div id="mylb3"></div>-->
+</div>
+
+
+
+</body>
+</html>

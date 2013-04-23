@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>jQuery UI Select Builder</title>
+    <!--<link rel="stylesheet" href="custom-theme/jquery-ui-1.9.2.custom.min.css">-->
+    <link rel="stylesheet" href="themes/smoothness/jquery-ui-all.css" />
+
+    <link rel="stylesheet" href="screen.css" >
+    <link rel="stylesheet" href="demo.css">
+    <script src="lib/jquery-1.7.1.min.js"></script>
+    <script src="lib/jquery-ui-1.9.2.min.js"></script>
+
+    <script src="src/jquery.optionlistbuilder.js"></script>
+
+         <script>
+        //target-action-param is the key - valueSelectList provides value list
+        var target_action_param_Map = {"response-adaptenableinternal-virtual":{"valueSelectList":[],"validationName":"internal-virtual","type":"string","required":"false"},"tclset-variablename":{"valueSelectList":[],"validationName":"name","type":"string","required":"true"},"forwardselectnode":{"valueSelectList":[],"validationName":"node","type":"string","required":"false"},"http-urireplacevalue":{"valueSelectList":[],"validationName":"url","type":"string","required":"false"},"forwardselectnexthop":{"valueSelectList":[],"validationName":"nexthop","type":"string","required":"false"},"forwardselectsnat":{"valueSelectList":[],"validationName":"snat","type":"string","required":"false"},"forwardselectclone-pool":{"valueSelectList":["\/Common\/fantastic.app\/fantastic_pool","\/Common\/pool-test","\/Common\/pool1"],"validationName":"pool","type":"string","required":"false"},"http-refererinsertvalue":{"valueSelectList":[],"validationName":"url","type":"string","required":"true"},"forwardselectvlan":{"valueSelectList":[],"validationName":"vlan","type":"string","required":"false"},"pemclassifyapplication":{"valueSelectList":[],"validationName":"pem-application","type":"string","required":"false"},"http-headerinsertvalue":{"valueSelectList":[],"validationName":"none","type":"string","required":"true"},"http-set-cookieinsertvalue":{"valueSelectList":[],"validationName":"none","type":"string","required":"false"},"forwardselectrateclass":{"valueSelectList":[],"validationName":"rateclass","type":"string","required":"false"},"http-headerreplacevalue":{"valueSelectList":[],"validationName":"none","type":"string","required":"true"},"forwardselectmember":{"valueSelectList":[],"validationName":"member","type":"string","required":"false"},"tclset-variableexpression":{"valueSelectList":[],"validationName":"tcl","type":"string","required":"true"},"cacheenablepin":{"valueSelectList":[],"validationName":"none","type":"boolean","required":"false"},"http-cookieinsertvalue":{"valueSelectList":[],"validationName":"none","type":"string","required":"false"},"http-replyredirectlocation":{"valueSelectList":[],"validationName":"url","type":"string","required":"true"},"pemclassifycategory":{"valueSelectList":[],"validationName":"pem-category","type":"string","required":"false"},"http-urireplacequery-string":{"valueSelectList":[],"validationName":"none","type":"string","required":"false"},"http-basic-authinsertpassword":{"valueSelectList":[],"validationName":"none","type":"string","required":"false"},"request-adaptenableinternal-virtual":{"valueSelectList":[],"validationName":"internal-virtual","type":"string","required":"false"},"http-set-cookieinsertdomain":{"valueSelectList":[],"validationName":"domain","type":"string","required":"false"},"http-cookieinsertname":{"valueSelectList":[],"validationName":"name","type":"string","required":"true"},"http-set-cookieinsertpath":{"valueSelectList":[],"validationName":"path","type":"string","required":"false"},"l7dosenablefrom-profile":{"valueSelectList":["\/Common\/dos","\/Common\/l7dos3"],"validationName":"dos-profile","type":"string","required":"false"},"forwardselectvlan-id":{"valueSelectList":[],"validationName":"vlan-id","type":"number","required":"false"},"http-headerreplacename":{"valueSelectList":[],"validationName":"name","type":"string","required":"true"},"http-basic-authinsertusername":{"valueSelectList":[],"validationName":"none","type":"string","required":"false"},"http-set-cookieinsertname":{"valueSelectList":[],"validationName":"name","type":"string","required":"true"},"logwritemessage":{"valueSelectList":[],"validationName":"none","type":"string","required":"true"},"http-headerinsertname":{"valueSelectList":[],"validationName":"name","type":"string","required":"true"},"http-methodreplacevalue":{"valueSelectList":[],"validationName":"method","type":"string","required":"true"},"http-headerremovename":{"valueSelectList":[],"validationName":"name","type":"string","required":"true"},"http-cookieremovename":{"valueSelectList":[],"validationName":"name","type":"string","required":"true"},"pemclassifydefer":{"valueSelectList":[],"validationName":"none","type":"boolean","required":"false"},"http-basic-authreplaceusername":{"valueSelectList":[],"validationName":"none","type":"string","required":"false"},"http-hostreplacevalue":{"valueSelectList":[],"validationName":"host","type":"string","required":"true"},"http-urireplacepath":{"valueSelectList":[],"validationName":"path","type":"string","required":"false"},"http-basic-authreplacepassword":{"valueSelectList":[],"validationName":"none","type":"string","required":"false"},"pemclassifyprotocol":{"valueSelectList":[],"validationName":"pem-protocol","type":"string","required":"false"},"http-set-cookieremovename":{"valueSelectList":[],"validationName":"name","type":"string","required":"true"},"asmenablepolicy":{"valueSelectList":["\/Common\/asm-policy"],"validationName":"asm-policy","type":"string","required":"true"},"forwardselectpool":{"valueSelectList":["\/Common\/fantastic.app\/fantastic_pool","\/Common\/pool-test","\/Common\/pool1"],"validationName":"pool","type":"string","required":"false"},"forwardselectsnatpool":{"valueSelectList":[],"validationName":"snatpool","type":"string","required":"false"},"forwardselectvirtual":{"valueSelectList":[],"validationName":"virtual","type":"string","required":"false"},"http-refererreplacevalue":{"valueSelectList":[],"validationName":"url","type":"string","required":"false"}};
+         
+         //target-action is the key - valueSelectList provides name list
+         var target_action_Map = {"l7dosenable":{"valueSelectList":["from-profile"],"validationName":"dos-profile","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-methodreplace":{"valueSelectList":["value"],"validationName":"method","requiredValueList":["value","value"],"isRequired":"true","type":"","defaultValue":""},"forwardselect":{"valueSelectList":["pool","clone-pool","node","member","snat","snatpool","nexthop","vlan","vlan-id","rateclass"],"validationName":"rateclass","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"logwrite":{"valueSelectList":["message"],"validationName":"none","requiredValueList":["message"],"isRequired":"true","type":"","defaultValue":""},"http-cookieinsert":{"valueSelectList":["name","value"],"validationName":"none","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-headerinsert":{"valueSelectList":["name","value"],"validationName":"none","requiredValueList":["name","value"],"isRequired":"true","type":"","defaultValue":""},"http-refererinsert":{"valueSelectList":["value"],"validationName":"url","requiredValueList":["value"],"isRequired":"true","type":"","defaultValue":""},"http-urireplace":{"valueSelectList":["value","path","query-string"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-basic-authinsert":{"valueSelectList":["username","password"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"asmenable":{"valueSelectList":["policy"],"validationName":"asm-policy","requiredValueList":["policy"],"isRequired":"true","type":"","defaultValue":""},"http-cookieremove":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-headerremove":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"pemclassify":{"valueSelectList":["application","category","protocol","defer"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-hostreplace":{"valueSelectList":["value"],"validationName":"host","requiredValueList":["value"],"isRequired":"true","type":"","defaultValue":""},"http-headerreplace":{"valueSelectList":["name","value"],"validationName":"none","requiredValueList":["name","value"],"isRequired":"true","type":"","defaultValue":""},"http-set-cookieremove":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"cacheenable":{"valueSelectList":["pin"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"boolean","defaultValue":""},"http-replyredirect":{"valueSelectList":["location"],"validationName":"url","requiredValueList":["location"],"isRequired":"true","type":"","defaultValue":""},"tclset-variable":{"valueSelectList":["name","expression"],"validationName":"tcl","requiredValueList":["name","expression"],"isRequired":"true","type":"","defaultValue":""},"http-basic-authreplace":{"valueSelectList":["username","password"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-refererreplace":{"valueSelectList":["value"],"validationName":"url","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-set-cookieinsert":{"valueSelectList":["name","value","domain","path"],"validationName":"path","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""}};
+         
+         var operand_selector_Map = {"http-refererunnamed-query-parameter":{"valueSelectList":["index"],"validationName":"none","requiredValueList":["index"],"isRequired":"true","type":"","defaultValue":""},"tcprtt":{"valueSelectList":["internal"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-uriunnamed-query-parameter":{"valueSelectList":["index"],"validationName":"none","requiredValueList":["index"],"isRequired":"true","type":"","defaultValue":""},"http-cookieall":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-headerall":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"tcpport":{"valueSelectList":["internal","local"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"tcpvlan":{"valueSelectList":["internal"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-set-cookieversion":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-set-cookievalue":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-set-cookiepath":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-refererpath-segment":{"valueSelectList":["index"],"validationName":"none","requiredValueList":["index"],"isRequired":"true","type":"","defaultValue":""},"http-uriall":{"valueSelectList":["url-decoded"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"tcpmss":{"valueSelectList":["internal"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-set-cookieexpiry":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"tcproute-domain":{"valueSelectList":["internal"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"tcpvlan-id":{"valueSelectList":["internal"],"validationName":"none","requiredValueList":[],"isRequired":"false","type":"","defaultValue":""},"http-uriquery-parameter":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-set-cookiedomain":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-refererquery-parameter":{"valueSelectList":["name"],"validationName":"name","requiredValueList":["name"],"isRequired":"true","type":"","defaultValue":""},"http-uripath-segment":{"valueSelectList":["index"],"validationName":"none","requiredValueList":["index"],"isRequired":"true","type":"","defaultValue":""}};
+         
+        
+        $(document).ready(function() {
+            $("#example_select").change(function(){
+                $("#mylb1").optionlistbuilder("dependentElementValueChange");
+            });
+            $("#mylb1_click_for_value").click(function(){
+                var v = $("#mylb1").optionlistbuilder("getHiddenValue");
+                $("#mylb1_hidden_value").text(v);
+            });
+            
+            $("#mylb2_click_for_value").click(function(){
+                var v = $("#mylb2").optionlistbuilder("getHiddenValue");
+                $("#mylb2_hidden_value").text(v);
+            });
+         
+            $("#mylb1").optionlistbuilder({"id":"mykvlb1","dependElementId":"example_select","nameMap":target_action_Map,"valueMap":target_action_param_Map,"uniqueKey":true});
+            $("#mylb2").optionlistbuilder({"id":"mykvlb2"});
+        });
+        
+        
+   
+        </script>
+</head>
+<body>
+ 
+
+<div ">
+<h1 style="font-size:2em;">jquery-option-listbuilder demo (jQuery UI widget)</h1>
+</div>
+<p>A custom widget built to allow user to create lists of options.  Options consist of name:value pairs.  </p>
+
+</code></pre>
+</li>
+</ul>
+</div>
+<h3>Examples </h3>
+<div >
+      <h4>Name list and data + unique key (name) is true</h4>
+      <div><select id="example_select">
+      <option value="l7dosenable">l7dosenable</option>
+      <option value="http-refererreplace">http-refererreplace</option>
+      <option value="http-headerinsert">http-headerinsert</option>
+      <option value="http-hostreplace">http-hostreplace</option>
+      <option value="forwardselect">forwardselect</option>
+      <option value="http-methodreplace">http-methodreplace</option>
+      <option value="cacheenable">cacheenable</option>
+      </select></div>
+      <div id="mylb1"></div>
+      <div><a href="#" id="mylb1_click_for_value">Click for value</a></div>
+      <div id="mylb1_hidden_value">value</div>
+      <div>
+      <pre><code>
+      $("#mylb1").optionlistbuilder({"id":"mykvlb1"
+      ,"dependElementId":"example_select"
+      ,"nameMap":target_action_Map
+      ,"valueMap":target_action_param_Map
+      ,"uniqueKey":true});
+      </pre></code>
+      </div>
+    
+</div>
+<div >
+      <h4>Value only</h4>
+      
+      <div id="mylb2"></div>
+      <div><a href="#" id="mylb2_click_for_value">Click for value</a></div>
+      <div id="mylb2_hidden_value">value</div>
+      <div>
+      <pre><code>
+      $("#mylb2").optionlistbuilder({"id":"mykvlb2"});
+      </pre></code>
+      </div>
+    
+</div>
+
+<h4>Public methods:</h4>
+<div>
+<ul>
+<li>dependentElementValueChange - function to call when the value associated with dependent element changes</li>
+</ul>
+</div>
+<h4>Output:</h4>
+<div>A JSON string that contains an array of 0 or more object can be found in a hidden input that has the id: supplied id (or 'default') + '_kvlv_hidden_input'.  This can be parsed.  The objects in the array have the format {"name":"xxx","value":"yyy","display":"zzz"}  </div>
+<h4>Options:</h4>
+<div>
+<ul>
+<li>id - used to ensure unique ids in page; default is "default"</li>
+<li>size - size of final rendered list of options; default is 3</li>
+<li>uniqueKey - force the name (key) to be unique; default is false; you cannot have a unique key if you do not provide a nameList</li>
+<li>onAfterAdd - allow calling function to define a callback to be executed after an option is added to the list; function provides string added to list as argument; default is do nothing</li>
+<li>onAfterDelete: allow calling function to define a callback to be executed after an option is delete from the list; function provides string delete from list as argument; default is do nothing</li>
+<li>dependElementId - id of field whose value is used to lookup name list in name map</li>
+<li>nameMap - json object contains source data for name field; format: 
+<pre><code>
+{
+    "l7dosenable": {
+        "valueSelectList": [
+            "from-profile"
+        ],
+        "validationName": "dos-profile",
+        "requiredValueList": [],
+        "isRequired": "false",
+        "type": "",
+        "defaultValue": ""
+    },
+    "http-methodreplace": {
+        "valueSelectList": [
+            "value"
+        ],
+        "validationName": "method",
+        "requiredValueList": [
+            "value",
+            "value"
+        ],
+        "isRequired": "true",
+        "type": "",
+        "defaultValue": ""
+    },
+    "cacheenable": {
+        "valueSelectList": [
+            "pin"
+        ],
+        "validationName": "none",
+        "requiredValueList": [],
+        "isRequired": "false",
+        "type": "boolean",
+        "defaultValue": ""
+    }
+}
+</code></pre>
+</li>
+<li>valueMap - json object contains source data for list of values if they exist; key is (value of dependElementId) + name; format: 
+<pre><code>
+{
+    "http-set-cookieinsertpath": {
+        "valueSelectList": [],
+        "validationName": "path",
+        "type": "string",
+        "required": "false"
+    },
+    "l7dosenablefrom-profile": {
+        "valueSelectList": [
+            "/Common/dos",
+            "/Common/l7dos3"
+        ],
+        "validationName": "dos-profile",
+        "type": "string",
+        "required": "false"
+    },
+    "forwardselectvlan-id": {
+        "valueSelectList": [],
+        "validationName": "vlan-id",
+        "type": "number",
+        "required": "false"
+    }
+}
+</code></pre>
+</li>
+</ul>
+</div>
+
+
+
+</body>
+</html>
